@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+// ====================== ENUMS ======================
+enum CarType {
+  SUV
+  Sedan
+  Hatchback
+  Truck
+  Van
+}
+
+enum NotificationStatus {
+  Unread
+  Read
+}
+
+enum SteeringType {
+  Automatic
+  Manual
+}
+
+enum DiscountType {
+  Percentage
+  Fixed
+}
+
+// ====================== MODELS ======================
+model User {
+  id              Int            @id @default(autoincrement())
+  name            String
+  email           String         @unique
+  password        String
+  phone           String
+  address         String
+  imageUrl        String?
+  jobTitle        String?
+  bio             String?
+  isEmailVerified Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  rentals         Rental[]
+  reviews         Review[]
+  notifications   Notification[]
+  Favorite        Favorite[]
+}
+
+model Car {
+  id           Int          @id @default(autoincrement())
+  name         String
+  type         CarType      @default(Sedan)
+  gasolineType String
+  steering     SteeringType @default(Automatic)
+  capacity     Int
+  pricePerDay  Float
+  description  String?
+  createdAt    DateTime     @default(now())
+  rentals      Rental[]
+  reviews      Review[]
+  Favorite     Favorite[]
+}
+
+model Rental {
+  id          Int        @id @default(autoincrement())
+  pickupDate  DateTime
+  dropoffDate DateTime
+  totalCost   Float
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  carId       Int
+  car         Car        @relation(fields: [carId], references: [id])
+  PromoCode   PromoCode? @relation(fields: [promoCode], references: [code])
+  promoCode   String?
+  payment     Payment?
+  createdAt   DateTime   @default(now())
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  method        String
+  amount        Float
+  transactionId String?  @unique
+  rentalId      Int      @unique
+  rental        Rental   @relation(fields: [rentalId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model Favorite {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  car       Car      @relation(fields: [carId], references: [id])
+  carId     Int
+  createdAt DateTime @default(now())
+
+  @@id([userId, carId])
+}
+
+model Notification {
+  id        Int                @id @default(autoincrement())
+  message   String
+  status    NotificationStatus @default(Unread)
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  createdAt DateTime           @default(now())
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  content   String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  carId     Int
+  car       Car      @relation(fields: [carId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model PromoCode {
+  code          String       @id
+  discountType  DiscountType
+  discountValue Float
+  expiresAt     DateTime
+  maxUses       Int?
+  usesCount     Int          @default(0)
+  rentals       Rental[]
+  createdAt     DateTime     @default(now())
+}
