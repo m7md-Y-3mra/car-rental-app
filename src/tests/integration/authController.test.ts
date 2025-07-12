@@ -1,0 +1,160 @@
+import repository from "@/data/repositories";
+import { createServer } from "@/server";
+import { generateToken } from "@/utils/jwtUtils";
+import request from "supertest";
+
+jest.mock("@/data/repositories");
+jest.mock("@/services/mailer", () => ({
+  mailer: {
+    send: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
+const app = createServer();
+
+describe("Health endpoint tests", () => {
+  test("Health endpoint returns ok 200", async () => {
+    await request(app)
+      .get("/health")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.ok).toBe(true);
+      });
+  });
+});
+
+describe("AuthController Integration Tests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("POST /v1/api/auth/signup", () => {
+    it("should return 201 and user data on successful signup", async () => {
+      const mockUser = { id: 1, name: "Test User", email: "test@example.com" };
+      (repository.createUser as jest.Mock).mockResolvedValue(mockUser);
+
+      const response = await request(app).post("/v1/api/auth/signup").send({
+        name: "Test User",
+        email: "test@example.com",
+        password: "Password123!",
+        phone: "0591234567",
+        address: "123 Test St",
+      });
+
+      expect(response.status).toBe(201);
+      expect(response.body.user).toEqual(mockUser);
+    });
+
+    it("should return 400 if validation fails", async () => {
+      const response = await request(app).post("/v1/api/auth/signup").send({
+        email: "invalid-email",
+        password: "short",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          { msg: "Name is required" },
+          { msg: "invalid email format" },
+          {
+            msg: "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a symbol",
+          },
+          { msg: "Phone is required" },
+          { msg: "Address is required" },
+        ]),
+      );
+    });
+
+    it("should return 400 if email already exists", async () => {
+      (repository.findUserByEmail as jest.Mock).mockResolvedValue(true);
+
+      const response = await request(app).post("/v1/api/auth/signup").send({
+        name: "Test User",
+        email: "mohammed",
+        password: "Password123!",
+        phone: "0591234567",
+        address: "123 Test St",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(expect.arrayContaining([{ msg: "Email already in use" }]));
+    });
+  });
+
+  describe("GET /v1/api/auth/verify-email", () => {
+    it("should return 200 on successful email verification", async () => {
+      (repository.findUserById as jest.Mock).mockResolvedValue({
+        id: 1,
+        email: "test@example.com",
+        isEmailVerified: false,
+      });
+
+      const response = await request(app)
+        .get("/v1/api/auth/verify-email")
+        .query({ token: generateToken({ id: 1 }) });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ message: "Email verified successfully" });
+    });
+
+    it("should return 400 if token is missing", async () => {
+      const response = await request(app).get("/v1/api/auth/verify-email").query({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(
+        expect.arrayContaining([{ msg: "Verification token is required" }]),
+      );
+    });
+
+    it("should return 400 if token is invalid", async () => {
+      const response = await request(app)
+        .get("/v1/api/auth/verify-email")
+        .query({ token: "invalid-token" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: {
+          message: "Invalid token format",
+          code: "ERR_INVALID_TOKEN",
+        },
+      });
+    });
+  });
+
+  describe("POST /v1/api/auth/resend-verification", () => {
+    it("should return 200 on successful resend", async () => {
+      (repository.findUserByEmail as jest.Mock).mockResolvedValue({
+        id: 1,
+        email: "test@example.com",
+        isEmailVerified: false,
+      });
+
+      const response = await request(app)
+        .post("/v1/api/auth/resend-verification")
+        .send({ email: "test@example.com" });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        message: "Verification email resent successfully",
+      });
+    });
+
+    it("should return 400 if email is missing", async () => {
+      const response = await request(app).post("/v1/api/auth/resend-verification").send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(expect.arrayContaining([{ msg: "Email is required" }]));
+    });
+
+    it("should return 400 if email is not found", async () => {
+      (repository.findUserByEmail as jest.Mock).mockResolvedValue(null);
+
+      const response = await request(app)
+        .post("/v1/api/auth/resend-verification")
+        .send({ email: "nonexistent@example.com" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual(expect.arrayContaining([{ msg: "Email not found" }]));
+    });
+  });
+});
