@@ -1,12 +1,12 @@
-import { IUserRepository } from "@/data/repositories/type";
-import { IMailer } from "@/services/mailer/interface";
-import { ResendVerificationUseCase } from "@/use-cases/ResendVerificationUseCase";
-import { generateToken } from "@/utils/jwtUtils";
-import { sendVerificationEmail } from "@/utils/emailUtils";
-import { plainToInstance } from "class-transformer";
 import { User } from "@/data/entities/User";
+import { IUserRepository } from "@/data/repositories/type";
 import EmailVerifiedError from "@/errors/EmailVerifiedError";
 import EntityNotFoundError from "@/errors/EntityNotFoundError";
+import { IMailer } from "@/services/mailer/interface";
+import { ResendVerificationUseCase } from "@/use-cases/ResendVerificationUseCase";
+import { sendVerificationEmail } from "@/utils/emailUtils";
+import { generateToken } from "@/utils/jwtUtils";
+import { plainToInstance } from "class-transformer";
 
 jest.mock("@/utils/jwtUtils");
 jest.mock("@/utils/emailUtils");
@@ -59,7 +59,9 @@ describe("ResendVerificationUseCase", () => {
     mockUserRepository.findUserByEmail.mockResolvedValue(mockUser);
     (generateToken as jest.Mock).mockReturnValue("test-token");
     (sendVerificationEmail as jest.Mock).mockResolvedValue(undefined);
-    (plainToInstance as jest.Mock).mockReturnValue(mockUser);
+    (plainToInstance as jest.Mock).mockReturnValue({
+      asDto: jest.fn(() => mockUser),
+    });
 
     const result = await useCase.execute(mockCommand);
 
@@ -78,7 +80,7 @@ describe("ResendVerificationUseCase", () => {
       new EmailVerifiedError({
         message: "Email is already verified",
         statusCode: 400,
-        code: "ERR_EV",
+        code: "ERR_EMAIL_ALREADY_VERIFIED",
       }),
     );
 
@@ -88,14 +90,15 @@ describe("ResendVerificationUseCase", () => {
   });
 
   it("should throw EntityNotFoundError if user does not exist", async () => {
-    mockUserRepository.findUserByEmail.mockRejectedValue(
+    mockUserRepository.findUserByEmail.mockResolvedValue(null);
+
+    await expect(useCase.execute(mockCommand)).rejects.toThrow(
       new EntityNotFoundError({
         message: "User not found",
         statusCode: 404,
+        code: "ERR_NOT_FOUND",
       }),
     );
-
-    await expect(useCase.execute(mockCommand)).rejects.toThrow(EntityNotFoundError);
 
     expect(generateToken).not.toHaveBeenCalled();
     expect(sendVerificationEmail).not.toHaveBeenCalled();

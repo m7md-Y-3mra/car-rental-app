@@ -1,7 +1,6 @@
 import { IUserRepository } from "@/data/repositories/type";
 import EmailVerifiedError from "@/errors/EmailVerifiedError";
 import EntityNotFoundError from "@/errors/EntityNotFoundError";
-import { IMailer } from "@/services/mailer/interface";
 import { verifyToken } from "@/utils/jwtUtils";
 
 export interface IVerifyEmailUseCase {
@@ -13,10 +12,7 @@ export interface VerifyEmailCommand {
 }
 
 export class VerifyEmailUseCase implements IVerifyEmailUseCase {
-  constructor(
-    protected repository: IUserRepository,
-    protected mailer: IMailer,
-  ) {}
+  constructor(protected repository: IUserRepository) {}
 
   async execute(command: VerifyEmailCommand) {
     const tokenPayload = verifyToken(command.token);
@@ -28,7 +24,7 @@ export class VerifyEmailUseCase implements IVerifyEmailUseCase {
       throw new EntityNotFoundError({
         message: "User not found",
         statusCode: 404,
-        code: "ERR_NF",
+        code: "ERR_NOT_FOUND",
       });
     }
 
@@ -36,7 +32,7 @@ export class VerifyEmailUseCase implements IVerifyEmailUseCase {
       throw new EmailVerifiedError({
         message: "Email already verified",
         statusCode: 400,
-        code: "ERR_EV",
+        code: "ERR_EMAIL_ALREADY_VERIFIED",
       });
     }
 

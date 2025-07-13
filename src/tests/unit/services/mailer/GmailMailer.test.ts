@@ -5,8 +5,7 @@ jest.mock("nodemailer");
 
 describe("GmailMailer", () => {
   let mailer: GmailMailer;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockTransporter: jest.Mocked<any>;
+  let mockTransporter: jest.Mocked<Pick<nodemailer.Transporter, "sendMail">>;
 
   beforeEach(() => {
     mockTransporter = {
@@ -30,6 +29,7 @@ describe("GmailMailer", () => {
 
     expect(mockTransporter.sendMail).toHaveBeenCalledWith(
       expect.objectContaining({
+        from: expect.stringContaining("Car Rental Service"),
         to: notification.to,
         subject: notification.subject,
         text: notification.text,

@@ -77,8 +77,10 @@ describe("authController", () => {
 
       await verifyEmail(mockReq as Request, mockRes as Response);
 
-      expect(VerifyEmailUseCase).toHaveBeenCalledWith(repository, mailer);
-      expect(VerifyEmailUseCase.prototype.execute).toHaveBeenCalledWith(command);
+      expect(VerifyEmailUseCase).toHaveBeenCalledWith(repository);
+      expect(VerifyEmailUseCase.prototype.execute).toHaveBeenCalledWith({
+        token: "valid-token",
+      });
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.send).toHaveBeenCalledWith({ message: "Email verified successfully" });
     });
@@ -92,7 +94,7 @@ describe("authController", () => {
 
       await expect(verifyEmail(mockReq as Request, mockRes as Response)).rejects.toThrow(mockError);
 
-      expect(VerifyEmailUseCase).toHaveBeenCalledWith(repository, mailer);
+      expect(VerifyEmailUseCase).toHaveBeenCalledWith(repository);
       expect(VerifyEmailUseCase.prototype.execute).toHaveBeenCalledWith(command);
     });
   });

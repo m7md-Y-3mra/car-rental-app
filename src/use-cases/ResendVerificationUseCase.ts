@@ -28,7 +28,7 @@ export class ResendVerificationUseCase implements IResendVerificationUseCase {
       throw new EntityNotFoundError({
         message: "User not found",
         statusCode: 404,
-        code: "ERR_NF",
+        code: "ERR_NOT_FOUND",
       });
     }
 
@@ -36,7 +36,7 @@ export class ResendVerificationUseCase implements IResendVerificationUseCase {
       throw new EmailVerifiedError({
         message: "Email is already verified",
         statusCode: 400,
-        code: "ERR_EV",
+        code: "ERR_EMAIL_ALREADY_VERIFIED",
       });
     }
 
@@ -46,6 +46,6 @@ export class ResendVerificationUseCase implements IResendVerificationUseCase {
 
     const user = plainToInstance(User, userData);
 
-    return user;
+    return user.asDto();
   }
 }

@@ -1,12 +1,23 @@
 import { APP_DEBUG } from "@/config/env";
 import CustomError from "@/errors/CustomError";
+import ValidationError from "@/errors/ValidationError";
 import { getErrorMessage } from "@/utils/errorMessage";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
 const errorHandler = (error: unknown, req: Request, res: Response, next: NextFunction) => {
-  console.log(process.env.APP_DEBUG);
   if (res.headersSent || APP_DEBUG) {
     next(error);
+    return;
+  }
+
+  if (error instanceof ValidationError) {
+    res.status(400).json({
+      error: {
+        message: error.message,
+        code: error.code,
+        errors: error.errors,
+      },
+    });
     return;
   }
 

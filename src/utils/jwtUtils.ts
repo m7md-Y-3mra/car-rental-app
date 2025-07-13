@@ -1,4 +1,4 @@
-import { JWT_TOKEN } from "@/config/env";
+import { JWT_SECRET } from "@/config/env";
 import InvalidTokenError from "@/errors/InvalidTokenError";
 import { JsonWebTokenError, NotBeforeError, TokenExpiredError, sign, verify } from "jsonwebtoken";
 
@@ -7,7 +7,7 @@ interface TokenPayload {
 }
 
 export const generateToken = (payload: TokenPayload) => {
-  return sign(payload, JWT_TOKEN, { expiresIn: "1d" });
+  return sign(payload, JWT_SECRET, { expiresIn: "1d" });
 };
 
 export const verifyToken = (token: string): TokenPayload => {
@@ -20,7 +20,7 @@ export const verifyToken = (token: string): TokenPayload => {
   }
 
   try {
-    const decoded = verify(token, JWT_TOKEN) as TokenPayload;
+    const decoded = verify(token, JWT_SECRET) as TokenPayload;
 
     if (!isValidTokenPayload(decoded)) {
       throw new InvalidTokenError({

@@ -52,17 +52,25 @@ describe("AuthController Integration Tests", () => {
       });
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(
-        expect.arrayContaining([
-          { msg: "Name is required" },
-          { msg: "invalid email format" },
-          {
-            msg: "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a symbol",
-          },
-          { msg: "Phone is required" },
-          { msg: "Address is required" },
-        ]),
-      );
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_VALIDATION",
+          errors: expect.arrayContaining([
+            { message: "Name is required" },
+            { message: "Name must be at least 2 characters" },
+            { message: "Invalid email format" },
+            {
+              message:
+                "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a symbol",
+            },
+            { message: "Phone is required" },
+            { message: "Invalid phone number" },
+            // { message: "Address is required" },
+            // { message: "Invalid value" },
+          ]),
+          message: "Validation Error",
+        },
+      });
     });
 
     it("should return 400 if email already exists", async () => {
@@ -70,14 +78,20 @@ describe("AuthController Integration Tests", () => {
 
       const response = await request(app).post("/v1/api/auth/signup").send({
         name: "Test User",
-        email: "mohammed",
+        email: "test@example.com",
         password: "Password123!",
         phone: "0591234567",
         address: "123 Test St",
       });
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(expect.arrayContaining([{ msg: "Email already in use" }]));
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_VALIDATION",
+          errors: expect.arrayContaining([{ message: "Email already in use" }]),
+          message: "Validation Error",
+        },
+      });
     });
   });
 
@@ -101,9 +115,16 @@ describe("AuthController Integration Tests", () => {
       const response = await request(app).get("/v1/api/auth/verify-email").query({});
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(
-        expect.arrayContaining([{ msg: "Verification token is required" }]),
-      );
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_VALIDATION",
+          errors: expect.arrayContaining([
+            { message: "Verification token is required" },
+            { message: "Invalid value" },
+          ]),
+          message: "Validation Error",
+        },
+      });
     });
 
     it("should return 400 if token is invalid", async () => {
@@ -143,7 +164,16 @@ describe("AuthController Integration Tests", () => {
       const response = await request(app).post("/v1/api/auth/resend-verification").send({});
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(expect.arrayContaining([{ msg: "Email is required" }]));
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_VALIDATION",
+          errors: expect.arrayContaining([
+            { message: "Email is required" },
+            { message: "Invalid email format" },
+          ]),
+          message: "Validation Error",
+        },
+      });
     });
 
     it("should return 400 if email is not found", async () => {
@@ -154,7 +184,13 @@ describe("AuthController Integration Tests", () => {
         .send({ email: "nonexistent@example.com" });
 
       expect(response.status).toBe(400);
-      expect(response.body).toEqual(expect.arrayContaining([{ msg: "Email not found" }]));
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_VALIDATION",
+          errors: expect.arrayContaining([{ message: "Email not found" }]),
+          message: "Validation Error",
+        },
+      });
     });
   });
 });

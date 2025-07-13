@@ -60,5 +60,14 @@ describe("User Entity", () => {
     expect(userDto).not.toHaveProperty("isEmailVerified");
     expect(userDto).not.toHaveProperty("createdAt");
     expect(userDto).not.toHaveProperty("updatedAt");
+
+    expect(userDto).toHaveProperty("id", validUserData.id);
+    expect(userDto).toHaveProperty("name", validUserData.name);
+    expect(userDto).toHaveProperty("email", validUserData.email);
+    expect(userDto).toHaveProperty("phone", validUserData.phone);
+    expect(userDto).toHaveProperty("address", validUserData.address);
+    expect(userDto).toHaveProperty("imageUrl", validUserData.imageUrl);
+    expect(userDto).toHaveProperty("jobTitle", validUserData.jobTitle);
+    expect(userDto).toHaveProperty("bio", validUserData.bio);
   });
 });

@@ -2,7 +2,6 @@ import { IUserRepository } from "@/data/repositories/type";
 import EmailVerifiedError from "@/errors/EmailVerifiedError";
 import EntityNotFoundError from "@/errors/EntityNotFoundError";
 import InvalidTokenError from "@/errors/InvalidTokenError";
-import { IMailer } from "@/services/mailer/interface";
 import { VerifyEmailUseCase } from "@/use-cases/VerifyEmailUseCase";
 import { verifyToken } from "@/utils/jwtUtils";
 
@@ -11,7 +10,6 @@ jest.mock("@/utils/jwtUtils");
 describe("VerifyEmailUseCase", () => {
   let useCase: VerifyEmailUseCase;
   let mockUserRepository: jest.Mocked<IUserRepository>;
-  let mockMailer: jest.Mocked<IMailer>;
 
   beforeEach(() => {
     mockUserRepository = {
@@ -21,11 +19,7 @@ describe("VerifyEmailUseCase", () => {
       createUser: jest.fn(),
     };
 
-    mockMailer = {
-      send: jest.fn(),
-    };
-
-    useCase = new VerifyEmailUseCase(mockUserRepository, mockMailer);
+    useCase = new VerifyEmailUseCase(mockUserRepository);
     jest.clearAllMocks();
   });
 
@@ -60,7 +54,7 @@ describe("VerifyEmailUseCase", () => {
         });
       });
 
-      await expect(useCase.execute(emptyTokenCommand)).rejects.toMatchObject(
+      await expect(useCase.execute(emptyTokenCommand)).rejects.toThrow(
         new InvalidTokenError({
           message: "Token is required",
           statusCode: 400,
@@ -154,7 +148,7 @@ describe("VerifyEmailUseCase", () => {
         new EmailVerifiedError({
           message: "Email already verified",
           statusCode: 400,
-          code: "ERR_EV",
+          code: "ERR_EMAIL_ALREADY_VERIFIED",
         }),
       );
     });

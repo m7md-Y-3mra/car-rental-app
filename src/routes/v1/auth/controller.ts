@@ -17,21 +17,21 @@ export const signup = async (req: Request, res: Response) => {
     address: req.body.address,
   };
 
-  const createTaskUseCase = new SignupUseCase(repository, mailer);
+  const signupUseCase = new SignupUseCase(repository, mailer);
 
-  const user = await createTaskUseCase.execute(command);
+  const user = await signupUseCase.execute(command);
 
   res.status(201).send({ user: user });
 };
 
 export const verifyEmail = async (req: Request, res: Response) => {
   const command: VerifyEmailCommand = {
-    token: req.query.token as string,
+    token: typeof req.query.token === "string" ? req.query.token : "",
   };
 
-  const createTaskUseCase = new VerifyEmailUseCase(repository, mailer);
+  const verifyEmailUseCase = new VerifyEmailUseCase(repository);
 
-  await createTaskUseCase.execute(command);
+  await verifyEmailUseCase.execute(command);
 
   res.status(200).send({ message: "Email verified successfully" });
 };

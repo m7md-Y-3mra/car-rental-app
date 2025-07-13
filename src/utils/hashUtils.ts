@@ -1,10 +1,13 @@
+import { SALT_ROUNDS } from "@/config/env";
 import bcrypt from "bcrypt";
 
 export const hashPassword = async (password: string) => {
   try {
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
     return bcrypt.hash(password, salt);
-  } catch {
-    throw new Error("Error hash password");
+  } catch (error) {
+    throw new Error(
+      `Error hashing password: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 };

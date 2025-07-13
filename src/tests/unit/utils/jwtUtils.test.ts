@@ -1,4 +1,4 @@
-import { JWT_TOKEN } from "@/config/env";
+import { JWT_SECRET } from "@/config/env";
 import InvalidTokenError from "@/errors/InvalidTokenError";
 import { generateToken, verifyToken } from "@/utils/jwtUtils";
 import { JsonWebTokenError, sign, TokenExpiredError, verify } from "jsonwebtoken";
@@ -18,7 +18,7 @@ describe("JWT Utils", () => {
       const token = generateToken(payload);
 
       expect(token).toBe("mock-token");
-      expect(sign).toHaveBeenCalledWith(payload, JWT_TOKEN, { expiresIn: "1d" });
+      expect(sign).toHaveBeenCalledWith(payload, JWT_SECRET, { expiresIn: "1d" });
     });
   });
 
@@ -32,7 +32,7 @@ describe("JWT Utils", () => {
       const result = verifyToken(token);
 
       expect(result).toEqual(validPayload);
-      expect(verify).toHaveBeenCalledWith(token, JWT_TOKEN);
+      expect(verify).toHaveBeenCalledWith(token, JWT_SECRET);
     });
 
     it("should throw for empty token", () => {

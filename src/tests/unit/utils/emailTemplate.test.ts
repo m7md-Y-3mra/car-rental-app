@@ -24,5 +24,10 @@ describe("email template", () => {
   `;
 
     expect(EmailTemplate({ link, name, description, buttonLabel })).toBe(result);
+    expect(result).toContain(`Hello ${name}`);
+    expect(result).toContain(description);
+    expect(result).toContain(`href="${link}"`);
+    expect(result).toContain(buttonLabel);
+    expect(result).toContain("expire in 24 hours");
   });
 });

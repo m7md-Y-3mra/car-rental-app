@@ -1,6 +1,6 @@
+import { SMTP_FROM, SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_USER } from "@/config/env";
 import { createTransport, TransportOptions } from "nodemailer";
 import { IMailer, IMailNotification } from "../interface";
-import { SMTP_FROM, SMTP_HOST, SMTP_PASS, SMTP_PORT, SMTP_USER } from "@/config/env";
 
 export class GmailMailer implements IMailer {
   private transporter;
@@ -9,7 +9,8 @@ export class GmailMailer implements IMailer {
     this.transporter = createTransport({
       host: SMTP_HOST,
       port: SMTP_PORT,
-      secure: false,
+      secure: SMTP_PORT === 465,
+      requireTLS: true,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
