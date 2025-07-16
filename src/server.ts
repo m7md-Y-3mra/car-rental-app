@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
 import morgan from "morgan";
+import { sessionMiddleware } from "./config/session";
 import errorHandler from "./middleware/error-handler";
 import v1 from "./routes/v1";
 
@@ -12,7 +13,8 @@ export const createServer = () => {
     .use(morgan("dev"))
     .use(express.urlencoded({ extended: true }))
     .use(express.json())
-    .use(cors());
+    .use(cors())
+    .use(sessionMiddleware);
 
   app.get("/health", async (req: Request, res: Response) => {
     res.status(200).json({ ok: true, env: process.env.NODE_ENV });

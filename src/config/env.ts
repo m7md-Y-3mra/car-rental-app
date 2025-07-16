@@ -18,3 +18,5 @@ export const JWT_SECRET =
 export const CONSOLE_LOG_EMAILS = process.env.CONSOLE_LOG_EMAILS === "true";
 
 export const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
+
+export const SESSION_SECRET = process.env.SESSION_SECRET || "your_strong_secret_here";
