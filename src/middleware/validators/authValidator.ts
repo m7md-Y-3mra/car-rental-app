@@ -66,6 +66,17 @@ export const validateResendVerification = [
     .custom(emailNotExists),
 ];
 
+export const signinValidator = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+
+  body("password").notEmpty().withMessage("Password is required"),
+];
+
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

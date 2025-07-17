@@ -1,0 +1,47 @@
+import { User } from "@/data/entities/User";
+import repository from "@/data/repositories";
+import CustomError from "@/errors/CustomError";
+import { SigninUseCase } from "@/use-cases/SigninUseCase";
+import { plainToInstance } from "class-transformer";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+
+passport.use(
+  "local",
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email, password, done) => {
+      const signinUseCase = new SigninUseCase(repository);
+
+      try {
+        const user = await signinUseCase.execute({ email, password });
+
+        return done(null, user);
+      } catch (error: unknown) {
+        if (error instanceof CustomError) {
+          done(error);
+        }
+        done(error);
+      }
+    },
+  ),
+);
+
+passport.serializeUser((user: UserDTO, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id: number, done) => {
+  try {
+    const userData = await repository.findUserById(id);
+    const user = plainToInstance(User, userData);
+    done(null, user.asDto());
+  } catch (error) {
+    done(error);
+  }
+});
+
+export default passport;
