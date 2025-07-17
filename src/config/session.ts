@@ -1,7 +1,20 @@
+import { Redis } from "@upstash/redis";
+import { RedisStore } from "connect-redis";
 import session from "express-session";
-import { ENV, SESSION_SECRET } from "./env";
+import { ENV, SESSION_SECRET, UPSTASH_REDIS_REST_TOKEN, UPSTASH_REDIS_REST_URL } from "./env";
+
+const redisClient = new Redis({
+  url: UPSTASH_REDIS_REST_URL,
+  token: UPSTASH_REDIS_REST_TOKEN,
+});
+
+const redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "carrental:",
+});
 
 export const sessionMiddleware = session({
+  store: redisStore,
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,

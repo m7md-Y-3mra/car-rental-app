@@ -20,3 +20,6 @@ export const CONSOLE_LOG_EMAILS = process.env.CONSOLE_LOG_EMAILS === "true";
 export const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
 export const SESSION_SECRET = process.env.SESSION_SECRET || "your_strong_secret_here";
+
+export const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || "";
+export const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
