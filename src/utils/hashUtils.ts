@@ -11,3 +11,13 @@ export const hashPassword = async (password: string) => {
     );
   }
 };
+
+export const comparePassword = async (password: string, hash: string) => {
+  try {
+    return await bcrypt.compare(password, hash);
+  } catch (error) {
+    throw new Error(
+      `Error comparing password: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+};
