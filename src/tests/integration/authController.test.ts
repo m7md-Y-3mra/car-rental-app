@@ -1,9 +1,11 @@
 import repository from "@/data/repositories";
 import { createServer } from "@/server";
+import * as hashUtils from "@/utils/hashUtils";
 import { generateToken } from "@/utils/jwtUtils";
 import request from "supertest";
 
 jest.mock("@/data/repositories");
+jest.mock("@/utils/hashUtils");
 jest.mock("@/services/mailer", () => ({
   mailer: {
     send: jest.fn().mockResolvedValue(undefined),
@@ -189,6 +191,77 @@ describe("AuthController Integration Tests", () => {
           code: "ERR_VALIDATION",
           errors: expect.arrayContaining([{ message: "Email not found" }]),
           message: "Validation Error",
+        },
+      });
+    });
+  });
+
+  describe("POST /v1/api/auth/signin", () => {
+    it("should return 200 and tokens on successful signin", async () => {
+      const mockUser = {
+        id: 1,
+        name: "Test User",
+        email: "test@example.com",
+        password: "hashedPassword",
+        isEmailVerified: true,
+      };
+      (repository.findUserByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (hashUtils.comparePassword as jest.Mock).mockResolvedValue(true);
+
+      const response = await request(app).post("/v1/api/auth/signin").send({
+        email: "test@example.com",
+        password: "Password123!",
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        user: {
+          id: 1,
+          name: "Test User",
+          email: "test@example.com",
+        },
+      });
+    });
+
+    it("should return 400 if validation fails", async () => {
+      const response = await request(app).post("/v1/api/auth/signin").send({
+        email: "invalid-email",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_VALIDATION",
+          errors: expect.arrayContaining([
+            { message: "Invalid email format" },
+            { message: "Password is required" },
+          ]),
+          message: "Validation Error",
+        },
+      });
+    });
+
+    it("should return 401 for incorrect credentials", async () => {
+      const mockUser = {
+        id: 1,
+        name: "Test User",
+        email: "test@example.com",
+        password: "hashedPassword",
+        isEmailVerified: true,
+      };
+      (repository.findUserByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (hashUtils.comparePassword as jest.Mock).mockResolvedValue(false);
+
+      const response = await request(app).post("/v1/api/auth/signin").send({
+        email: "test@example.com",
+        password: "wrongPassword",
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: {
+          code: "ERR_AUTH",
+          message: "Invalid credentials",
         },
       });
     });
