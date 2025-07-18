@@ -1,6 +1,5 @@
 import { User } from "@/data/entities/User";
 import repository from "@/data/repositories";
-import CustomError from "@/errors/CustomError";
 import { SigninUseCase } from "@/use-cases/SigninUseCase";
 import { plainToInstance } from "class-transformer";
 import passport from "passport";
@@ -21,9 +20,6 @@ passport.use(
 
         return done(null, user);
       } catch (error: unknown) {
-        if (error instanceof CustomError) {
-          done(error);
-        }
         done(error);
       }
     },
