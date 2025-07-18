@@ -9,7 +9,7 @@ const redisClient = new Redis({
 });
 
 // Test Redis connection
-redisClient.ping().catch((err) => {
+redisClient.get("ping").catch((err) => {
   console.error("Redis connection failed:", err);
 });
 
