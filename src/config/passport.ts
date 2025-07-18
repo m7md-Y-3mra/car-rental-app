@@ -33,6 +33,9 @@ passport.serializeUser((user: UserDTO, done) => {
 passport.deserializeUser(async (id: number, done) => {
   try {
     const userData = await repository.findUserById(id);
+    if (!userData) {
+      return done(null, false);
+    }
     const user = plainToInstance(User, userData);
     done(null, user.asDto());
   } catch (error) {
