@@ -8,6 +8,11 @@ const redisClient = new Redis({
   token: UPSTASH_REDIS_REST_TOKEN,
 });
 
+// Test Redis connection
+redisClient.ping().catch((err) => {
+  console.error("Redis connection failed:", err);
+});
+
 const redisStore = new RedisStore({
   client: redisClient,
   prefix: "carrental:",
