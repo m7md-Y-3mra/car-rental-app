@@ -5,6 +5,24 @@ import { generateToken } from "@/utils/jwtUtils";
 import request from "supertest";
 
 jest.mock("@/data/repositories");
+jest.mock("@upstash/redis", () => {
+  const store = new Map<string, string>();
+  return {
+    Redis: jest.fn(() => ({
+      get: jest.fn((key: string) => {
+        return Promise.resolve(store.get(key));
+      }),
+      set: jest.fn((key: string, value: string) => {
+        store.set(key, value);
+        return Promise.resolve("OK");
+      }),
+      del: jest.fn((key: string) => {
+        store.delete(key);
+        return Promise.resolve(1);
+      }),
+    })),
+  };
+});
 jest.mock("@/utils/hashUtils");
 jest.mock("@/services/mailer", () => ({
   mailer: {
@@ -206,6 +224,7 @@ describe("AuthController Integration Tests", () => {
         isEmailVerified: true,
       };
       (repository.findUserByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (repository.findUserById as jest.Mock).mockResolvedValue(mockUser);
       (hashUtils.comparePassword as jest.Mock).mockResolvedValue(true);
 
       const response = await request(app).post("/v1/api/auth/signin").send({
