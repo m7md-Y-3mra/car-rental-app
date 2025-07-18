@@ -1,29 +1,35 @@
 import repository from "@/data/repositories";
-import { resendVerificationEmail, signup, verifyEmail } from "@/routes/v1/auth/controller";
+import { resendVerificationEmail, signin, signup, verifyEmail } from "@/routes/v1/auth/controller";
 import { mailer } from "@/services/mailer";
 import { ResendVerificationUseCase } from "@/use-cases/ResendVerificationUseCase";
 import { SignupUseCase } from "@/use-cases/SignupUseCase";
 import { VerifyEmailUseCase } from "@/use-cases/VerifyEmailUseCase";
 import { Request, Response } from "express";
+import passport from "passport";
 
 jest.mock("@/use-cases/SignupUseCase");
 jest.mock("@/use-cases/VerifyEmailUseCase");
 jest.mock("@/use-cases/ResendVerificationUseCase");
+jest.mock("passport");
 
 describe("authController", () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
+  let mockNext: jest.Mock;
 
   beforeEach(() => {
     mockReq = {
       body: {},
       query: {},
+      logIn: jest.fn(),
     };
 
     mockRes = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
     };
+
+    mockNext = jest.fn();
 
     jest.clearAllMocks();
   });
@@ -127,6 +133,65 @@ describe("authController", () => {
 
       expect(ResendVerificationUseCase).toHaveBeenCalledWith(repository, mailer);
       expect(ResendVerificationUseCase.prototype.execute).toHaveBeenCalledWith(mockReq.body);
+    });
+  });
+
+  describe("signin", () => {
+    const mockUser = { id: 1, name: "Test User", email: "test@example.com" };
+
+    it("should send user data on successful signin", () => {
+      const mockAuthenticate = jest.fn((strategy, callback) => {
+        callback(null, mockUser);
+        return (req: Request, res: Response, next: jest.Mock) => {};
+      });
+      (passport.authenticate as jest.Mock).mockImplementation(mockAuthenticate);
+
+      (mockReq.logIn as jest.Mock).mockImplementation((user, callback) => {
+        callback(null);
+      });
+
+      signin(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(passport.authenticate).toHaveBeenCalledWith("local", expect.any(Function));
+      expect(mockReq.logIn).toHaveBeenCalledWith(mockUser, expect.any(Function));
+      expect(mockRes.send).toHaveBeenCalledWith({ user: mockUser });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should call next with error if passport.authenticate fails", () => {
+      const mockError = new Error("Authentication failed");
+      const mockAuthenticate = jest.fn((strategy, callback) => {
+        callback(mockError, null);
+        return (req: Request, res: Response, next: jest.Mock) => {};
+      });
+      (passport.authenticate as jest.Mock).mockImplementation(mockAuthenticate);
+
+      signin(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(passport.authenticate).toHaveBeenCalledWith("local", expect.any(Function));
+      expect(mockNext).toHaveBeenCalledWith(mockError);
+      expect(mockReq.logIn).not.toHaveBeenCalled();
+      expect(mockRes.send).not.toHaveBeenCalled();
+    });
+
+    it("should call next with error if req.logIn fails", () => {
+      const mockError = new Error("Login failed");
+      const mockAuthenticate = jest.fn((strategy, callback) => {
+        callback(null, mockUser);
+        return (req: Request, res: Response, next: jest.Mock) => {};
+      });
+      (passport.authenticate as jest.Mock).mockImplementation(mockAuthenticate);
+
+      (mockReq.logIn as jest.Mock).mockImplementation((user, callback) => {
+        callback(mockError);
+      });
+
+      signin(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(passport.authenticate).toHaveBeenCalledWith("local", expect.any(Function));
+      expect(mockReq.logIn).toHaveBeenCalledWith(mockUser, expect.any(Function));
+      expect(mockNext).toHaveBeenCalledWith(mockError);
+      expect(mockRes.send).not.toHaveBeenCalled();
     });
   });
 });

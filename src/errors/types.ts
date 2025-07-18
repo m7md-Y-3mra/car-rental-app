@@ -8,4 +8,5 @@ export type ErrorCode =
   | "ERR_TOKEN_NOT_ACTIVE"
   | "ERR_INVALID_TOKEN"
   | "ERR_TOKEN_VERIFICATION"
-  | "ERR_VALIDATION";
+  | "ERR_VALIDATION"
+  | "ERR_AUTH";

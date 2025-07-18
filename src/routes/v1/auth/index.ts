@@ -1,5 +1,5 @@
-import { Router, Request, Response } from "express";
 import * as authValidator from "@/middleware/validators/authValidator";
+import { Router } from "express";
 import * as authController from "./controller";
 
 const authRouter = Router();
@@ -23,6 +23,13 @@ authRouter.post(
   authValidator.validateResendVerification,
   authValidator.handleValidationErrors,
   authController.resendVerificationEmail,
+);
+
+authRouter.post(
+  "/signin",
+  authValidator.signinValidator,
+  authValidator.handleValidationErrors,
+  authController.signin,
 );
 
 export default authRouter;

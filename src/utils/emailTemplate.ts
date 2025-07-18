@@ -1,4 +1,9 @@
-import { EmailTemplateProps } from "@/types";
+export interface EmailTemplateProps {
+  link: string;
+  name: string;
+  description: string;
+  buttonLabel: string;
+}
 
 export const EmailTemplate = ({ link, name, description, buttonLabel }: EmailTemplateProps) => {
   return `

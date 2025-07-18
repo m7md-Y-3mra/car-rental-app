@@ -1,3 +1,4 @@
+import passport from "@/config/passport";
 import repository from "@/data/repositories";
 import { mailer } from "@/services/mailer";
 import {
@@ -6,7 +7,7 @@ import {
 } from "@/use-cases/ResendVerificationUseCase";
 import { SignupCommand, SignupUseCase } from "@/use-cases/SignupUseCase";
 import { VerifyEmailCommand, VerifyEmailUseCase } from "@/use-cases/VerifyEmailUseCase";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export const signup = async (req: Request, res: Response) => {
   const command: SignupCommand = {
@@ -48,4 +49,25 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
   res.status(200).send({
     message: "Verification email resent successfully",
   });
+};
+
+export const signin = async (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate("local", (err: unknown, user: UserDTO) => {
+    if (err) {
+      next(err);
+      return;
+    }
+
+    // Log in user
+    req.logIn(user, (err) => {
+      if (err) {
+        next(err);
+        return;
+      }
+
+      return res.send({
+        user,
+      });
+    });
+  })(req, res, next);
 };
