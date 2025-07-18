@@ -219,6 +219,11 @@ describe("AuthController Integration Tests", () => {
           id: 1,
           name: "Test User",
           email: "test@example.com",
+          phone: undefined,
+          address: undefined,
+          imageUrl: undefined,
+          jobTitle: undefined,
+          bio: undefined,
         },
       });
     });
