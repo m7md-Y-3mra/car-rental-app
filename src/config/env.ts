@@ -23,3 +23,7 @@ export const SESSION_SECRET = process.env.SESSION_SECRET || "your_strong_secret_
 
 export const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || "";
 export const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
+
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "";

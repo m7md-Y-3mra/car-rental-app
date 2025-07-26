@@ -71,3 +71,9 @@ export const signin = async (req: Request, res: Response, next: NextFunction) =>
     });
   })(req, res, next);
 };
+
+export const oauthCallback = (req: Request, res: Response) => {
+  // Successful authentication, redirect to the frontend
+  // res.redirect(process.env.CLIENT_URL + "/dashboard");
+  res.sendStatus(200);
+};
