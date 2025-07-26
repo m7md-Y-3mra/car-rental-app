@@ -4,15 +4,15 @@ import { Exclude, instanceToPlain } from "class-transformer";
 export class User implements IUser {
   id: number;
   name: string;
-  email: string;
-  phone: string;
-  address: string;
-  imageUrl: string;
-  jobTitle: string;
-  bio: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  imageUrl: string | null;
+  jobTitle: string | null;
+  bio: string | null;
 
   @Exclude({ toPlainOnly: true })
-  password: string;
+  password: string | null;
   @Exclude({ toPlainOnly: true })
   isEmailVerified: boolean;
   @Exclude({ toPlainOnly: true })
@@ -23,13 +23,13 @@ export class User implements IUser {
   constructor(
     id: number,
     name: string,
-    email: string,
-    phone: string,
-    address: string,
-    imageUrl: string,
-    jobTitle: string,
-    bio: string,
-    password: string,
+    email: string | null,
+    phone: string | null,
+    address: string | null,
+    imageUrl: string | null,
+    jobTitle: string | null,
+    bio: string | null,
+    password: string | null,
     isEmailVerified: boolean,
     createdAt: Date,
     updatedAt: Date,
