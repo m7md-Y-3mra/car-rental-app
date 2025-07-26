@@ -18,6 +18,7 @@ describe("SigninUseCase", () => {
       findUserByEmail: jest.fn(),
       findUserById: jest.fn(),
       updateUser: jest.fn(),
+      findOrCreateFromSocial: jest.fn(),
     };
 
     signinUseCase = new SigninUseCase(mockRepository);

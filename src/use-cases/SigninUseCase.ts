@@ -36,6 +36,13 @@ export class SigninUseCase implements ISigninUseCase {
       });
     }
 
+    if (!userData.password) {
+      throw new AuthenticationError({
+        message: "Invalid credentials",
+        statusCode: 401,
+        code: "ERR_AUTH",
+      });
+    }
     const validPassword = await comparePassword(password, userData.password);
 
     if (!validPassword) {
