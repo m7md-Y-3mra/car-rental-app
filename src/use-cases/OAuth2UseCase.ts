@@ -7,6 +7,7 @@ export interface IOAuth2UseCase {
 }
 
 export interface IOAuth2Command {
+  providerName: string;
   id: string;
   displayName: string;
   email: string | null;
@@ -17,9 +18,9 @@ export class OAuth2UseCase implements IOAuth2UseCase {
   constructor(protected repository: IUserRepository) {}
 
   async execute(command: IOAuth2Command) {
-    const { id, displayName, email, imageUrl } = command;
+    const { providerName, id, displayName, email, imageUrl } = command;
     const userData = await this.repository.findOrCreateFromSocial(
-      "facebook",
+      providerName,
       id,
       displayName,
       email,

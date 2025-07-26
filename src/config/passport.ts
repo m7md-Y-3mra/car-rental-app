@@ -48,7 +48,6 @@ passport.use(
         const imageUrl = profile.photos?.[0]?.value || null;
 
         const command: IOAuth2Command = {
-          providerName: "google",
           id,
           displayName,
           email,
