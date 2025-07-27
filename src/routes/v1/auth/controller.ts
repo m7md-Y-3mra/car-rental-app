@@ -1,5 +1,6 @@
 import passport from "@/config/passport";
 import repository from "@/data/repositories";
+import AuthenticationError from "@/errors/AuthenticationError";
 import { mailer } from "@/services/mailer";
 import {
   IResendVerificationCommand,
@@ -72,8 +73,22 @@ export const signin = async (req: Request, res: Response, next: NextFunction) =>
   })(req, res, next);
 };
 
-export const oauthCallback = (req: Request, res: Response) => {
-  // Successful authentication, redirect to the frontend
-  // res.redirect(process.env.CLIENT_URL + "/dashboard");
-  res.sendStatus(200);
+export const oauthCallback = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return next(
+      new AuthenticationError({
+        message: "Authentication failed",
+        statusCode: 401,
+        code: "ERR_AUTH",
+      }),
+    );
+  }
+
+  req.logIn(req.user as UserDTO, (err) => {
+    if (err) {
+      return next(err);
+    }
+
+    return res.json({ user: req.user });
+  });
 };
