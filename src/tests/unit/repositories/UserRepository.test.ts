@@ -126,7 +126,6 @@ describe("UserRepository", () => {
         email,
         imageUrl,
         isEmailVerified: true,
-        password: "password",
         phone: null,
         address: null,
         jobTitle: null,
