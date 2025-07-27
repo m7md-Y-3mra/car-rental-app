@@ -7,7 +7,6 @@ import { VerifyEmailUseCase } from "@/use-cases/VerifyEmailUseCase";
 import { Request, Response } from "express";
 import passport from "passport";
 
-jest.mock("@/config/passport");
 jest.mock("@/use-cases/SignupUseCase");
 jest.mock("@/use-cases/VerifyEmailUseCase");
 jest.mock("@/use-cases/ResendVerificationUseCase");
