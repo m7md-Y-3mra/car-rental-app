@@ -27,14 +27,20 @@ describe("UserRepository", () => {
     const email = "test@example.com";
     const imageUrl = "http://example.com/image.jpg";
 
+    beforeEach(() => {
+      (prismaMock.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return callback(prismaMock);
+      });
+    });
+
     it("should return an existing user if the OAuth identity already exists", async () => {
       const user = {
         id: 1,
         name,
         email,
+        password: null,
         imageUrl,
         isEmailVerified: true,
-        password: "password",
         phone: null,
         address: null,
         jobTitle: null,
@@ -84,9 +90,9 @@ describe("UserRepository", () => {
         id: 1,
         name,
         email,
+        password: null,
         imageUrl,
         isEmailVerified: true,
-        password: "password",
         phone: null,
         address: null,
         jobTitle: null,
@@ -124,6 +130,7 @@ describe("UserRepository", () => {
         id: 2,
         name,
         email,
+        password: null,
         imageUrl,
         isEmailVerified: true,
         phone: null,
@@ -171,9 +178,9 @@ describe("UserRepository", () => {
         id: 3,
         name,
         email: null,
+        password: null,
         imageUrl,
         isEmailVerified: true,
-        password: "password",
         phone: null,
         address: null,
         jobTitle: null,
