@@ -1,5 +1,5 @@
 import EntityNotFoundError from "@/errors/EntityNotFoundError";
-import { OAuthIdentity, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import BaseRepository, { Constructor } from "./BaseRepository";
 import { IUserRepository } from "./type";
@@ -45,34 +45,6 @@ export function UserRepository<TBase extends Constructor<BaseRepository>>(Base: 
       }
     }
 
-    findOAuthIdentity = (provider: string, providerUserId: string) => {
-      return this.client.oAuthIdentity.findUnique({
-        where: {
-          provider_providerUserId: {
-            provider,
-            providerUserId,
-          },
-        },
-        include: {
-          user: true,
-        },
-      });
-    };
-
-    createOAuthIdentity = (
-      userId: number,
-      provider: string,
-      providerUserId: string,
-    ): Promise<OAuthIdentity> => {
-      return this.client.oAuthIdentity.create({
-        data: {
-          provider,
-          providerUserId,
-          userId,
-        },
-      });
-    };
-
     async findOrCreateFromSocial(
       provider: string,
       providerUserId: string,
@@ -80,32 +52,48 @@ export function UserRepository<TBase extends Constructor<BaseRepository>>(Base: 
       email: string | null,
       imageUrl: string | null,
     ) {
-      // Check if OAuth identity exists
-      const existingIdentity = await this.findOAuthIdentity(provider, providerUserId);
+      return this.client.$transaction(async (tx) => {
+        // Check if OAuth identity exists
+        const identityCheck = await tx.oAuthIdentity.findUnique({
+          where: {
+            provider_providerUserId: {
+              provider,
+              providerUserId,
+            },
+          },
+          include: { user: true },
+        });
 
-      if (existingIdentity) {
-        return existingIdentity.user;
-      }
+        if (identityCheck) {
+          return identityCheck.user;
+        }
 
-      // Check if user exists by email
-      let user = email ? await this.findUserByEmail(email) : null;
+        // Check if user exists by email
+        let user = email ? await tx.user.findUnique({ where: { email } }) : null;
 
-      // If user doesn't exist, create a new one
-      if (!user) {
-        user = await this.client.user.create({
+        // If user doesn't exist, create a new one
+        if (!user) {
+          user = await tx.user.create({
+            data: {
+              name,
+              email,
+              imageUrl,
+              isEmailVerified: true, // Social accounts are verified
+            },
+          });
+        }
+
+        // Create OAuth identity
+        await tx.oAuthIdentity.create({
           data: {
-            name,
-            email,
-            imageUrl,
-            isEmailVerified: true, // Social accounts are verified
+            provider,
+            providerUserId,
+            userId: user.id,
           },
         });
-      }
 
-      // Create OAuth identity
-      await this.createOAuthIdentity(user.id, provider, providerUserId);
-
-      return user;
+        return user;
+      });
     }
   };
 }
