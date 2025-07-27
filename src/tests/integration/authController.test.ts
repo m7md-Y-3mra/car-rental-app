@@ -4,6 +4,7 @@ import * as hashUtils from "@/utils/hashUtils";
 import { generateToken } from "@/utils/jwtUtils";
 import request from "supertest";
 
+jest.mock("@/config/passport");
 jest.mock("@/data/repositories");
 jest.mock("@upstash/redis", () => {
   const store = new Map<string, string>();
