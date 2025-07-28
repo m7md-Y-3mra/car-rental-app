@@ -85,7 +85,6 @@ passport.use(
       passReqToCallback: true,
     },
     async (req, accessToken, refreshToken, profile, done) => {
-      console.log(profile);
       const oauth2UseCase = new OAuth2UseCase(repository);
       try {
         const id = profile.id;
