@@ -6,7 +6,7 @@
     "dev": "dotenv -- tsc-watch --sourceMap --onSuccess \"node --enable-source-maps dist/index.js\"",
     "build": "tsc --sourceMap",
     "start": "dotenv -- node dist/index.js --enable-source-maps",
-    "test": "jest",
+    "test": "jest --setupFiles dotenv/config",
     "test:unit": "jest src/tests/unit",
     "test:integration": "jest src/tests/integration --detectOpenHandles",
     "test:watch": "jest --watch",
