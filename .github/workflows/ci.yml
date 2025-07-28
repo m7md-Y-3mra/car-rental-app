@@ -28,4 +28,6 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_CALLBACK_URL: ${{ secrets.GOOGLE_CALLBACK_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          APP_DEBUG: ${{ secrets.APP_DEBUG }} 
         run: npm test
