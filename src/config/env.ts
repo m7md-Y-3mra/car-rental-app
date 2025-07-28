@@ -19,11 +19,32 @@ export const CONSOLE_LOG_EMAILS = process.env.CONSOLE_LOG_EMAILS === "true";
 
 export const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
-export const SESSION_SECRET = process.env.SESSION_SECRET || "your_strong_secret_here";
+export const SESSION_SECRET =
+  process.env.SESSION_SECRET ||
+  (() => {
+    throw new Error("SESSION_SECRET environment variable is required");
+  })();
 
-export const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || "";
-export const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
+export const UPSTASH_REDIS_REST_URL =
+  process.env.UPSTASH_REDIS_REST_URL ||
+  (() => {
+    throw new Error("UPSTASH_REDIS_REST_URL environment variable is required");
+  })();
+export const UPSTASH_REDIS_REST_TOKEN =
+  process.env.UPSTASH_REDIS_REST_TOKEN ||
+  (() => {
+    throw new Error("UPSTASH_REDIS_REST_TOKEN environment variable is required");
+  })();
 
-export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
-export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "";
+export const GOOGLE_CLIENT_ID =
+  process.env.GOOGLE_CLIENT_ID ||
+  (() => {
+    throw new Error("GOOGLE_CLIENT_ID environment variable is required for OAuth2");
+  })();
+export const GOOGLE_CLIENT_SECRET =
+  process.env.GOOGLE_CLIENT_SECRET ||
+  (() => {
+    throw new Error("GOOGLE_CLIENT_SECRET environment variable is required for OAuth2");
+  })();
+export const GOOGLE_CALLBACK_URL =
+  process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/api/v1/auth/google/callback";
