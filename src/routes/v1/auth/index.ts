@@ -40,4 +40,11 @@ authRouter.get(
   authController.oauthCallback,
 );
 
+authRouter.get("/facebook", passport.authenticate("facebook"));
+authRouter.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", { failureRedirect: "/signin" }),
+  authController.oauthCallback,
+);
+
 export default authRouter;
