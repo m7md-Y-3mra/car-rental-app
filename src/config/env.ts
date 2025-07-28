@@ -61,3 +61,16 @@ export const FACEBOOK_APP_SECRET =
   })();
 export const FACEBOOK_CALLBACK_URL =
   process.env.FACEBOOK_CALLBACK_URL || "http://localhost:3000/api/v1/auth/facebook/callback";
+
+export const TWITTER_CONSUMER_KEY =
+  process.env.TWITTER_CONSUMER_KEY ||
+  (() => {
+    throw new Error("TWITTER_CONSUMER_KEY environment variable is required for OAuth2");
+  })();
+export const TWITTER_CONSUMER_SECRET =
+  process.env.TWITTER_CONSUMER_SECRET ||
+  (() => {
+    throw new Error("TWITTER_CONSUMER_SECRET environment variable is required for OAuth2");
+  })();
+export const TWITTER_CALLBACK_URL =
+  process.env.TWITTER_CALLBACK_URL || "http://localhost:3000/api/v1/auth/facebook/callback";
