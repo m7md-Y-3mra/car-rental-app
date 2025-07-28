@@ -17,6 +17,7 @@ describe("VerifyEmailUseCase", () => {
       updateUser: jest.fn(),
       findUserByEmail: jest.fn(),
       createUser: jest.fn(),
+      findOrCreateFromSocial: jest.fn(),
     };
 
     useCase = new VerifyEmailUseCase(mockUserRepository);

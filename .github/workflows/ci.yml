@@ -24,4 +24,13 @@ jobs:
         run: npm run lint
 
       - name: Run Tests
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_CALLBACK_URL: ${{ secrets.GOOGLE_CALLBACK_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          APP_DEBUG: ${{ secrets.APP_DEBUG }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
         run: npm test

@@ -36,10 +36,10 @@ enum DiscountType {
 model User {
   id              Int            @id @default(autoincrement())
   name            String
-  email           String         @unique
-  password        String
-  phone           String
-  address         String
+  email           String?         @unique
+  password        String?
+  phone           String?
+  address         String?
   imageUrl        String?
   jobTitle        String?
   bio             String?
@@ -50,6 +50,20 @@ model User {
   reviews         Review[]
   notifications   Notification[]
   Favorite        Favorite[]
+  oauthIdentities         OAuthIdentity[]
+}
+
+model OAuthIdentity {
+  id             Int      @id @default(autoincrement())
+  provider       String // 'google', 'facebook', 'twitter'
+  providerUserId String // Unique ID from the provider
+  user           User     @relation(fields: [userId], references: [id])
+  userId         Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([provider, providerUserId]) // Unique combination per provider
+  @@unique([userId, provider]) // Only one identity per provider per user
 }
 
 model Car {

@@ -1,5 +1,12 @@
 import repository from "@/data/repositories";
-import { resendVerificationEmail, signin, signup, verifyEmail } from "@/routes/v1/auth/controller";
+import AuthenticationError from "@/errors/AuthenticationError";
+import {
+  oauthCallback,
+  resendVerificationEmail,
+  signin,
+  signup,
+  verifyEmail,
+} from "@/routes/v1/auth/controller";
 import { mailer } from "@/services/mailer";
 import { ResendVerificationUseCase } from "@/use-cases/ResendVerificationUseCase";
 import { SignupUseCase } from "@/use-cases/SignupUseCase";
@@ -13,7 +20,7 @@ jest.mock("@/use-cases/ResendVerificationUseCase");
 jest.mock("passport");
 
 describe("authController", () => {
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<Request & { user: unknown }>;
   let mockRes: Partial<Response>;
   let mockNext: jest.Mock;
 
@@ -22,11 +29,13 @@ describe("authController", () => {
       body: {},
       query: {},
       logIn: jest.fn(),
+      user: undefined,
     };
 
     mockRes = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
+      json: jest.fn(),
     };
 
     mockNext = jest.fn();
@@ -137,7 +146,16 @@ describe("authController", () => {
   });
 
   describe("signin", () => {
-    const mockUser = { id: 1, name: "Test User", email: "test@example.com" };
+    const mockUser: UserDTO = {
+      id: 1,
+      name: "Test User",
+      email: "test@example.com",
+      phone: null,
+      address: null,
+      imageUrl: null,
+      jobTitle: null,
+      bio: null,
+    };
 
     it("should send user data on successful signin", () => {
       const mockAuthenticate = jest.fn((strategy, callback) => {
@@ -192,6 +210,56 @@ describe("authController", () => {
       expect(mockReq.logIn).toHaveBeenCalledWith(mockUser, expect.any(Function));
       expect(mockNext).toHaveBeenCalledWith(mockError);
       expect(mockRes.send).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("oauthCallback", () => {
+    const mockUser: UserDTO = {
+      id: 1,
+      name: "Test User",
+      email: "test@example.com",
+      phone: null,
+      address: null,
+      imageUrl: null,
+      jobTitle: null,
+      bio: null,
+    };
+
+    it("should call req.logIn and send user data if req.user exists", () => {
+      mockReq.user = mockUser;
+      (mockReq.logIn as jest.Mock).mockImplementation((user, callback) => {
+        callback(null);
+      });
+
+      oauthCallback(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(mockReq.logIn).toHaveBeenCalledWith(mockUser, expect.any(Function));
+      expect(mockRes.json).toHaveBeenCalledWith({ user: mockUser });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should call next with an AuthenticationError if req.user does not exist", () => {
+      mockReq.user = undefined;
+
+      oauthCallback(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AuthenticationError));
+      expect(mockReq.logIn).not.toHaveBeenCalled();
+      expect(mockRes.json).not.toHaveBeenCalled();
+    });
+
+    it("should call next with an error if req.logIn fails", () => {
+      const mockError = new Error("Login failed");
+      mockReq.user = mockUser;
+      (mockReq.logIn as jest.Mock).mockImplementation((user, callback) => {
+        callback(mockError);
+      });
+
+      oauthCallback(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(mockReq.logIn).toHaveBeenCalledWith(mockUser, expect.any(Function));
+      expect(mockNext).toHaveBeenCalledWith(mockError);
+      expect(mockRes.json).not.toHaveBeenCalled();
     });
   });
 });

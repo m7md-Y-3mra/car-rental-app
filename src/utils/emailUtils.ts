@@ -15,6 +15,9 @@ const createVerificationEmailNotification = (user: User, token: string): IMailNo
   const subject = "Verify Your Email Address";
   const text = `Hello ${user.name},\n\nPlease verify your email by clicking the link: ${verificationLink}`;
 
+  if (!user.email) {
+    throw new Error("User email is not defined");
+  }
   return {
     to: user.email,
     subject,

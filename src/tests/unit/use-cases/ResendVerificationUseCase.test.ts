@@ -23,6 +23,7 @@ describe("ResendVerificationUseCase", () => {
       createUser: jest.fn(),
       findUserById: jest.fn(),
       updateUser: jest.fn(),
+      findOrCreateFromSocial: jest.fn(),
     };
 
     mockMailer = {

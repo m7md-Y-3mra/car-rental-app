@@ -22,6 +22,7 @@ describe("SignupUseCase", () => {
       findUserByEmail: jest.fn(),
       findUserById: jest.fn(),
       updateUser: jest.fn(),
+      findOrCreateFromSocial: jest.fn(),
     };
 
     mockMailer = {

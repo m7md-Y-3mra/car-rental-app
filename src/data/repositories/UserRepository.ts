@@ -44,5 +44,56 @@ export function UserRepository<TBase extends Constructor<BaseRepository>>(Base: 
         throw error;
       }
     }
+
+    async findOrCreateFromSocial(
+      provider: string,
+      providerUserId: string,
+      name: string,
+      email: string | null,
+      imageUrl: string | null,
+    ) {
+      return this.client.$transaction(async (tx) => {
+        // Check if OAuth identity exists
+        const identityCheck = await tx.oAuthIdentity.findUnique({
+          where: {
+            provider_providerUserId: {
+              provider,
+              providerUserId,
+            },
+          },
+          include: { user: true },
+        });
+
+        if (identityCheck) {
+          return identityCheck.user;
+        }
+
+        // Check if user exists by email
+        let user = email ? await tx.user.findUnique({ where: { email } }) : null;
+
+        // If user doesn't exist, create a new one
+        if (!user) {
+          user = await tx.user.create({
+            data: {
+              name,
+              email,
+              imageUrl,
+              isEmailVerified: true, // Social accounts are verified
+            },
+          });
+        }
+
+        // Create OAuth identity
+        await tx.oAuthIdentity.create({
+          data: {
+            provider,
+            providerUserId,
+            userId: user.id,
+          },
+        });
+
+        return user;
+      });
+    }
   };
 }
