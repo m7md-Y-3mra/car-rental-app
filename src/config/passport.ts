@@ -4,9 +4,17 @@ import { IOAuth2Command, OAuth2UseCase } from "@/use-cases/OAuth2UseCase";
 import { SigninUseCase } from "@/use-cases/SigninUseCase";
 import { plainToInstance } from "class-transformer";
 import passport from "passport";
+import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
-import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "./env";
+import {
+  FACEBOOK_APP_ID,
+  FACEBOOK_APP_SECRET,
+  FACEBOOK_CALLBACK_URL,
+  GOOGLE_CALLBACK_URL,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+} from "./env";
 
 passport.use(
   "local",
@@ -49,6 +57,44 @@ passport.use(
 
         const command: IOAuth2Command = {
           providerName: "google",
+          id,
+          displayName,
+          email,
+          imageUrl,
+        };
+
+        const user = await oauth2UseCase.execute(command);
+
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    },
+  ),
+);
+
+// Facebook Strategy
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: FACEBOOK_APP_ID,
+      clientSecret: FACEBOOK_APP_SECRET,
+      callbackURL: FACEBOOK_CALLBACK_URL,
+      profileFields: ["id", "displayName", "emails", "photos"],
+      scope: ["email", "public_profile"],
+      passReqToCallback: true,
+    },
+    async (req, accessToken, refreshToken, profile, done) => {
+      console.log(profile);
+      const oauth2UseCase = new OAuth2UseCase(repository);
+      try {
+        const id = profile.id;
+        const displayName = profile.displayName;
+        const email = profile.emails?.[0]?.value || null;
+        const imageUrl = profile.photos?.[0]?.value || null;
+
+        const command: IOAuth2Command = {
+          providerName: "facebook",
           id,
           displayName,
           email,

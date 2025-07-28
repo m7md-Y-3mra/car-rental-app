@@ -48,3 +48,16 @@ export const GOOGLE_CLIENT_SECRET =
   })();
 export const GOOGLE_CALLBACK_URL =
   process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/api/v1/auth/google/callback";
+
+export const FACEBOOK_APP_ID =
+  process.env.FACEBOOK_APP_ID ||
+  (() => {
+    throw new Error("FACEBOOK_APP_ID environment variable is required for OAuth2");
+  })();
+export const FACEBOOK_APP_SECRET =
+  process.env.FACEBOOK_APP_SECRET ||
+  (() => {
+    throw new Error("FACEBOOK_APP_SECRET environment variable is required for OAuth2");
+  })();
+export const FACEBOOK_CALLBACK_URL =
+  process.env.FACEBOOK_CALLBACK_URL || "http://localhost:3000/api/v1/auth/facebook/callback";
