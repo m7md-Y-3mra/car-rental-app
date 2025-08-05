@@ -1,11 +1,10 @@
-import { APP_DEBUG } from "@/config/env";
 import CustomError from "@/errors/CustomError";
 import ValidationError from "@/errors/ValidationError";
 import { getErrorMessage } from "@/utils/errorMessage";
 import { NextFunction, Request, Response } from "express";
 
 const errorHandler = (error: unknown, req: Request, res: Response, next: NextFunction) => {
-  if (res.headersSent || APP_DEBUG) {
+  if (res.headersSent) {
     next(error);
     return;
   }
