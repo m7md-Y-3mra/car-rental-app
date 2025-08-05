@@ -7,7 +7,7 @@
     "build": "tsc --sourceMap",
     "start": "dotenv -- node dist/index.js --enable-source-maps",
     "test": "jest --setupFiles dotenv/config",
-    "test:unit": "jest src/tests/unit",
+    "test:unit": "jest src/tests/unit --setupFiles dotenv/config",
     "test:integration": "jest src/tests/integration --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -33,7 +33,7 @@
     "@types/passport-facebook": "^3.0.3",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-local": "^1.0.38",
-    "@types/passport-twitter": "^1.0.40",
+    "@types/passport-oauth2": "^1.8.0",
     "@types/supertest": "^6.0.3",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9.29.0",
@@ -54,8 +54,8 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^5.8.1",
+    "@superfaceai/passport-twitter-oauth2": "^1.2.4",
     "@tsconfig/node22": "^22.0.2",
-    "@upstash/redis": "^1.35.1",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "connect-redis": "^9.0.0",
@@ -71,7 +71,6 @@
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
-    "passport-twitter": "^0.1.5",
     "reflect-metadata": "^0.2.2"
   },
   "_moduleAliases": {

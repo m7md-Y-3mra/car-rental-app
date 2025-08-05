@@ -1,16 +1,9 @@
 import repository from "@/data/repositories";
 import { IOAuth2Command, OAuth2UseCase } from "@/use-cases/OAuth2UseCase";
-import { Request } from "express";
 import { Profile } from "passport";
 import { VerifyCallback } from "passport-google-oauth20";
 
-export const oauth2Callback = async (
-  req: Request,
-  accessToken: string,
-  refreshToken: string,
-  profile: Profile,
-  done: VerifyCallback,
-) => {
+export const oauth2Callback = async (profile: Profile, done: VerifyCallback) => {
   const oauth2UseCase = new OAuth2UseCase(repository);
   try {
     const id = profile.id;
@@ -31,6 +24,7 @@ export const oauth2Callback = async (
 
     return done(null, user);
   } catch (error) {
-    return done(error as Error);
+    const err = error as Error;
+    return done(null, false, { message: err.message });
   }
 };

@@ -30,11 +30,6 @@ export const UPSTASH_REDIS_REST_URL =
   (() => {
     throw new Error("UPSTASH_REDIS_REST_URL environment variable is required");
   })();
-export const UPSTASH_REDIS_REST_TOKEN =
-  process.env.UPSTASH_REDIS_REST_TOKEN ||
-  (() => {
-    throw new Error("UPSTASH_REDIS_REST_TOKEN environment variable is required");
-  })();
 
 export const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||
@@ -47,7 +42,7 @@ export const GOOGLE_CLIENT_SECRET =
     throw new Error("GOOGLE_CLIENT_SECRET environment variable is required for OAuth2");
   })();
 export const GOOGLE_CALLBACK_URL =
-  process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/api/v1/auth/google/callback";
+  process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/v1/api/auth/google/callback";
 
 export const FACEBOOK_APP_ID =
   process.env.FACEBOOK_APP_ID ||
@@ -60,7 +55,7 @@ export const FACEBOOK_APP_SECRET =
     throw new Error("FACEBOOK_APP_SECRET environment variable is required for OAuth2");
   })();
 export const FACEBOOK_CALLBACK_URL =
-  process.env.FACEBOOK_CALLBACK_URL || "http://localhost:3000/api/v1/auth/facebook/callback";
+  process.env.FACEBOOK_CALLBACK_URL || "http://localhost:3000/v1/api/auth/facebook/callback";
 
 export const TWITTER_CONSUMER_KEY =
   process.env.TWITTER_CONSUMER_KEY ||
@@ -73,4 +68,15 @@ export const TWITTER_CONSUMER_SECRET =
     throw new Error("TWITTER_CONSUMER_SECRET environment variable is required for OAuth2");
   })();
 export const TWITTER_CALLBACK_URL =
-  process.env.TWITTER_CALLBACK_URL || "http://localhost:3000/api/v1/auth/facebook/callback";
+  process.env.TWITTER_CALLBACK_URL || "http://localhost:3000/v1/api/auth/twitter/callback";
+
+export const TWITTER_CLIENT_ID =
+  process.env.TWITTER_CLIENT_ID ||
+  (() => {
+    throw new Error("TWITTER_CLIENT_ID environment variable is required for OAuth2");
+  })();
+export const TWITTER_CLIENT_SECRET =
+  process.env.TWITTER_CLIENT_SECRET ||
+  (() => {
+    throw new Error("TWITTER_CLIENT_SECRET environment variable is required for OAuth2");
+  })();

@@ -47,4 +47,11 @@ authRouter.get(
   authController.oauthCallback,
 );
 
+authRouter.get("/twitter", passport.authenticate("twitter"));
+authRouter.get(
+  "/twitter/callback",
+  passport.authenticate("twitter", { failureRedirect: "/signin" }),
+  authController.oauthCallback,
+);
+
 export default authRouter;
