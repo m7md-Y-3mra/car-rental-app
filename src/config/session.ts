@@ -1,17 +1,16 @@
-import { Redis } from "@upstash/redis";
 import { RedisStore } from "connect-redis";
 import session from "express-session";
-import { ENV, SESSION_SECRET, UPSTASH_REDIS_REST_TOKEN, UPSTASH_REDIS_REST_URL } from "./env";
+import { ENV, SESSION_SECRET, UPSTASH_REDIS_REST_URL } from "./env";
 
-const redisClient = new Redis({
+import { createClient } from "redis";
+
+// Create Redis client
+const redisClient = createClient({
   url: UPSTASH_REDIS_REST_URL,
-  token: UPSTASH_REDIS_REST_TOKEN,
 });
 
-// Test Redis connection
-redisClient.get("ping").catch((err) => {
-  console.error("Redis connection failed:", err);
-});
+redisClient.on("error", (err) => console.error("Redis Client Error:", err));
+redisClient.connect().then(() => console.log("Redis client connected"));
 
 const redisStore = new RedisStore({
   client: redisClient,

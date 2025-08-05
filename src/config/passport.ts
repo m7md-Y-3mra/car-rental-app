@@ -1,12 +1,15 @@
 import { User } from "@/data/entities/User";
 import repository from "@/data/repositories";
-import { IOAuth2Command, OAuth2UseCase } from "@/use-cases/OAuth2UseCase";
 import { SigninUseCase } from "@/use-cases/SigninUseCase";
+import { oauth2Callback } from "@/utils/passportUtils";
+import { Strategy as TwitterStrategy } from "@superfaceai/passport-twitter-oauth2";
 import { plainToInstance } from "class-transformer";
-import passport from "passport";
+import { Request } from "express";
+import passport, { Profile } from "passport";
 import { Strategy as FacebookStrategy } from "passport-facebook";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
+
 import {
   FACEBOOK_APP_ID,
   FACEBOOK_APP_SECRET,
@@ -14,6 +17,9 @@ import {
   GOOGLE_CALLBACK_URL,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  TWITTER_CALLBACK_URL,
+  TWITTER_CLIENT_ID,
+  TWITTER_CLIENT_SECRET,
 } from "./env";
 
 passport.use(
@@ -47,28 +53,14 @@ passport.use(
       scope: ["profile", "email"],
       passReqToCallback: true,
     },
-    async (req, accessToken, refreshToken, profile, done) => {
-      const oauth2UseCase = new OAuth2UseCase(repository);
-      try {
-        const id = profile.id;
-        const displayName = profile.displayName;
-        const email = profile.emails?.[0]?.value || null;
-        const imageUrl = profile.photos?.[0]?.value || null;
-
-        const command: IOAuth2Command = {
-          providerName: "google",
-          id,
-          displayName,
-          email,
-          imageUrl,
-        };
-
-        const user = await oauth2UseCase.execute(command);
-
-        return done(null, user);
-      } catch (error) {
-        return done(error);
-      }
+    async (
+      req: Request,
+      accessToken: string,
+      refreshToken: string,
+      profile: Profile,
+      done: VerifyCallback,
+    ) => {
+      oauth2Callback(profile, done);
     },
   ),
 );
@@ -84,28 +76,37 @@ passport.use(
       scope: ["email", "public_profile"],
       passReqToCallback: true,
     },
-    async (req, accessToken, refreshToken, profile, done) => {
-      const oauth2UseCase = new OAuth2UseCase(repository);
-      try {
-        const id = profile.id;
-        const displayName = profile.displayName;
-        const email = profile.emails?.[0]?.value || null;
-        const imageUrl = profile.photos?.[0]?.value || null;
+    async (
+      req: Request,
+      accessToken: string,
+      refreshToken: string,
+      profile: Profile,
+      done: VerifyCallback,
+    ) => {
+      oauth2Callback(profile, done);
+    },
+  ),
+);
 
-        const command: IOAuth2Command = {
-          providerName: "facebook",
-          id,
-          displayName,
-          email,
-          imageUrl,
-        };
-
-        const user = await oauth2UseCase.execute(command);
-
-        return done(null, user);
-      } catch (error) {
-        return done(error);
-      }
+// Twitter Strategy
+passport.use(
+  new TwitterStrategy(
+    {
+      clientType: "confidential",
+      clientID: TWITTER_CLIENT_ID,
+      clientSecret: TWITTER_CLIENT_SECRET,
+      callbackURL: TWITTER_CALLBACK_URL,
+      scope: ["users.read", "tweet.read"], // OAuth 2.0 scopes
+      passReqToCallback: true,
+    },
+    async (
+      req: Request,
+      accessToken: string,
+      refreshToken: string,
+      profile: Profile,
+      done: VerifyCallback,
+    ) => {
+      oauth2Callback(profile, done);
     },
   ),
 );

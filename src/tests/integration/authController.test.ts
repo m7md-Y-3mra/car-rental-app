@@ -5,22 +5,23 @@ import { generateToken } from "@/utils/jwtUtils";
 import request from "supertest";
 
 jest.mock("@/data/repositories");
-jest.mock("@upstash/redis", () => {
+jest.mock("redis", () => {
   const store = new Map<string, string>();
+  const client = {
+    get: jest.fn((key: string) => Promise.resolve(store.get(key))),
+    set: jest.fn((key: string, value: string) => {
+      store.set(key, value);
+      return Promise.resolve("OK");
+    }),
+    del: jest.fn((key: string) => {
+      store.delete(key);
+      return Promise.resolve(1);
+    }),
+    on: jest.fn().mockReturnThis(),
+    connect: jest.fn(() => Promise.resolve()),
+  };
   return {
-    Redis: jest.fn(() => ({
-      get: jest.fn((key: string) => {
-        return Promise.resolve(store.get(key));
-      }),
-      set: jest.fn((key: string, value: string) => {
-        store.set(key, value);
-        return Promise.resolve("OK");
-      }),
-      del: jest.fn((key: string) => {
-        store.delete(key);
-        return Promise.resolve(1);
-      }),
-    })),
+    createClient: jest.fn(() => client),
   };
 });
 jest.mock("@/utils/hashUtils");
